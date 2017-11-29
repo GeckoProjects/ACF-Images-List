@@ -9,6 +9,7 @@ Author: Bayu Darmantra
 Author URI: AUTHOR_URL
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
+GitHub Plugin URI: https://github.com/GeckoProjects/ACF-Images-List
 */
 
 // exit if accessed directly
