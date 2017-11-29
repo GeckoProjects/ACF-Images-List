@@ -119,7 +119,7 @@
 		//Drag and drop images
 		function init_sortable() {
 			$(settings.image_wrapper).find('ul').sortable({
-				placeholder: "ui-state-highlight"
+				placeholder: "gk_image-sortable-placeholder"
 			});
 
 			$(settings.image_wrapper).disableSelection();

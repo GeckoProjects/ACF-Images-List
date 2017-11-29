@@ -1,5 +1,5 @@
 .gk_image-block,
-.ui-state-highlight{
+.gk_image-sortable-placeholder{
   display:inline-block;
   position:relative;
   margin:1px;
@@ -21,14 +21,14 @@
   cursor: grabbing;
 }
 
-.ui-state-highlight{
+.gk_image-sortable-placeholder{
   height:182px;
   background-color: #e8e8e8;
   outline: 1px dashed #333;
   position: relative;
 }
 
-.ui-state-highlight:after{
+.gk_image-sortable-placeholder:after{
   content:'DROP HERE';
   text-align: center;
   line-height: 182px;
