@@ -24,6 +24,8 @@
 			primary_image_field: '#gk_primary-image-field'
 		}, options );
 
+		init_sortable();
+
 		//Open media library, select images, populate images to div, prelect images
 		$( settings.media_button ).click(function(e) {
 				e.preventDefault();
@@ -60,6 +62,8 @@
 															'<input type="hidden" name="'+ $( settings.media_button ).data('field-name') +'" value="' + id + '">'+
 															'<a href="#" class="gk_set-primary-image">Set as primary</a></li>';
 							$(settings.image_wrapper).find('ul').append(template);
+
+							init_sortable();
 
 							if( index == 0 ) {
 								default_primary(id);
@@ -110,6 +114,15 @@
 			$( settings.primary_image_field ).val( image_id );
 			$( settings.single_image_wrapper ).eq(0).addClass('disabled');
 			$( primary_text ).prependTo( $(settings.single_image_wrapper).eq(0) ).slideDown();
+		}
+
+		//Drag and drop images
+		function init_sortable() {
+			$(settings.image_wrapper).find('ul').sortable({
+				placeholder: "ui-state-highlight"
+			});
+
+			$(settings.image_wrapper).disableSelection();
 		}
 
 		//Set primary image

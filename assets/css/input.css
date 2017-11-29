@@ -1,8 +1,38 @@
-.gk_image-block{
+.gk_image-block,
+.ui-state-highlight{
   display:inline-block;
   position:relative;
   margin:1px;
   overflow:hidden;
+  width: 150px;
+  background-color: #FFF;
+}
+
+.gk_image-block:hover{
+  cursor: move;
+  cursor: grab;
+  cursor: -moz-grab;
+  cursor: -webkit-grab;
+}
+
+.gk_image-block:active{
+  cursor: -webkit-grabbing;
+  cursor: -moz-grabbing;
+  cursor: grabbing;
+}
+
+.ui-state-highlight{
+  height:182px;
+  background-color: #e8e8e8;
+  outline: 1px dashed #333;
+  position: relative;
+}
+
+.ui-state-highlight:after{
+  content:'DROP HERE';
+  text-align: center;
+  line-height: 182px;
+  color:#999;
 }
 
 .gk_del-image{
