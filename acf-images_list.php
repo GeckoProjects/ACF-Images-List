@@ -2,11 +2,11 @@
 
 /*
 Plugin Name: Advanced Custom Fields: Images List
-Plugin URI: PLUGIN_URL
+Plugin URI: https://github.com/GeckoProjects/ACF-Images-List
 Description: Images list Add on for Advanced Custom Fields (Currently only support for V4 ACF)
-Version: 2.0.0
+Version: 2.0.1
 Author: Bayu Darmantra
-Author URI: AUTHOR_URL
+Author URI: https://github.com/GeckoProjects/ACF-Images-List
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 GitHub Plugin URI: https://github.com/GeckoProjects/ACF-Images-List
