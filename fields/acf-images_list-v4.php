@@ -90,7 +90,7 @@ class acf_field_images_list extends acf_field {
 
 		// Create Field Options HTML
 		?>
-		
+
 		<?php
 
 	}
@@ -126,6 +126,13 @@ class acf_field_images_list extends acf_field {
 		?>
 		<div class="gk_button-media-library-wrapper">
 			<button type="button" name="button" id="gk_open-media-library" data-field-name="<?php echo $image_name; ?>">Add Images</button>
+			<?php
+				if( count( $image_value ) > 0 ) {
+			?>
+			<button type="button" name="button" id="gk_clear-all">Clear All</button>
+			<?php
+				}
+			?>
 		</div>
 		<div id="gk_images-wrapper">
 			<?php
@@ -134,7 +141,12 @@ class acf_field_images_list extends acf_field {
 					foreach ($image_value as $image_id) {
 						$primary_text = '';
 						$disable_class = '';
-						$image_url = wp_get_attachment_image_src( $image_id, 'thumbnail', true );
+						$image_url = wp_get_attachment_image_src( $image_id, 'thumbnail' )[0];
+
+						if( !$image_url ) {
+							$image_url = plugins_url( 'assets/images/default-placeholder.jpg', dirname(__FILE__) );
+						}
+
 						if( $image_id == $image_primary_value ) {
 							$primary_text = '<span class="gk_primary-image-text">Primary Image <i class="dashicons dashicons-yes"></i></span>';
 							$disable_class = 'disabled';
@@ -144,13 +156,13 @@ class acf_field_images_list extends acf_field {
 						<li class="gk_image-block <?php echo $disable_class; ?>">
 							<?php echo $primary_text; ?>
 			        <a href="#" class="gk_del-image"><span class="dashicons dashicons-no"></span></a>
-			        <img src="<?= $image_url[0]; ?>" data-id="<?= $image_id; ?>"/>
+			        <img src="<?= $image_url; ?>" data-id="<?= $image_id; ?>"/>
 			        <input type="hidden" name="<?php echo $image_name; ?>" value="<?= $image_id; ?>">
 							<a href="#" class="gk_set-primary-image">Set as primary</a>
 			      </li>
 
 						<?php
-					}
+						}
 					echo '</ul>';
 				}
 			?>
