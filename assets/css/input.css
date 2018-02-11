@@ -11,13 +11,10 @@
 .gk_image-block:hover{
   cursor: move;
   cursor: grab;
-  cursor: -moz-grab;
   cursor: -webkit-grab;
 }
 
 .gk_image-block:active{
-  cursor: -webkit-grabbing;
-  cursor: -moz-grabbing;
   cursor: grabbing;
 }
 
@@ -73,7 +70,8 @@
   border-radius:5px 5px 0 0
 }
 
-#gk_open-media-library{
+#gk_open-media-library,
+#gk_clear-all{
   border:0;
   background-color: #0085ba;
   color:#FFF;
@@ -81,6 +79,15 @@
   padding:10px 20px;
   cursor:pointer;
   transition:all 300ms;
+}
+
+#gk_clear-all{
+  background-color:#f03;
+}
+
+#gk_clear-all:hover{
+  background-color:#88001b;
+  color:#FFF;
 }
 
 #gk_open-media-library:hover,
