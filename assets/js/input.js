@@ -144,6 +144,17 @@
 				$( settings.primary_image_field ).val( image_id );
 			}
 		})
+
+		//Clear all images
+		$('#gk_clear-all').click(function(e) {
+			e.preventDefault();
+			var warning = confirm( "This action cannot be undone. Do you want to continue?" );
+
+			if( warning ) {
+				$('#gk_images-wrapper').html('');
+				$('#gk_primary-image-field').val('');
+			}
+		})
 	}
 
 
