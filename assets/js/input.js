@@ -1,162 +1,216 @@
 (function($){
 
+  $(document).ready(function() {
+		imagesList.init();
+  });
 
-	function initialize_field( $el ) {
+  var selector = {
+    media_button: '.gk_open-media-library',
+    delete_image_button: '.gk_del-image',
+    set_primary_button: '.gk_set-primary-image',
+    image_wrapper: '.gk_images-wrapper',
+    single_image_wrapper: '.gk_image-block',
+    primary_image_field: '.gk_primary-image-field',
+		primary_image_text: '.gk_primary-image-text',
+    clear_all_button: '.gk_clear-all',
+    field_wrapper: '.field',
+		image_placeholder: 'gk_image-sortable-placeholder'
+  }
 
-		//$el.doStuff();
-		$('#gk_open-media-library').imagesChooser();
-	}
+  var imagesList = {
+    _frame: null,
 
-	/*
-	* Images function
-	*/
+    //Create media dialog frame
+    create_media_frame: function( $el ) {
+  		imagesList._frame = wp.media.frames.file_frame = wp.media({
+  				title: 'Select Images',
+  				library: {
+  					type: 'image'
+  				},
+  				button: {
+  						text: 'Select Images'
+  				},
+  				multiple: true
+  		});
 
-	$.fn.imagesChooser = function( options ) {
-		var el = $(this);
-		var custom_uploader;
+			imagesList.media_events( $el );
+    },
 
-		var settings = $.extend({
-			media_button: '#gk_open-media-library',
-			delete_image_button: '.gk_del-image',
-			set_primary_button: '.gk_set-primary-image',
-			image_wrapper: '#gk_images-wrapper',
-			single_image_wrapper: '.gk_image-block',
-			primary_image_field: '#gk_primary-image-field'
-		}, options );
+    //Reset frame
+    reset_frame: function() {
+      if( imagesList._frame ) {
+  			imagesList._frame.detach();
+        imagesList._frame = null;
+  		}
+    },
 
-		init_sortable();
+		//Get images selection and insert to DOM
+		get_selection: function( $el ) {
+			var attachment = imagesList._frame.state().get('selection').toJSON();
+			$el.find( selector.image_wrapper ).html('<ul></ul>');
 
-		//Open media library, select images, populate images to div, prelect images
-		$( settings.media_button ).click(function(e) {
-				e.preventDefault();
+			if( attachment.length > 0 ) {
+				$( selector.clear_all_button ).fadeIn().css("display","inline-block");
+			}
 
-				//If the uploader object has already been created, reopen the dialog
-				if (custom_uploader) {
-						custom_uploader.open();
-						return;
+			$.each(attachment, function(index, image) {
+				var thumb = image.sizes.thumbnail.url;
+				var id = image.id;
+        var primary_button = '<a href="javascript:void(0)" class="gk_set-primary-image">Set as primary</a></li>';
+
+        if( !$el.find( selector.image_wrapper ).data('enable-primary') ) {
+          primary_button = '';
+        }
+
+				var template = '<li class="'+ selector.single_image_wrapper.replace('.', '') +'">'+
+												'<a href="javascript:void(0)" class="'+ selector.delete_image_button.replace('.', '') +'"><span class="dashicons dashicons-no"></span></a>'+
+												'<img src="' + thumb + '" data-id="' + id + '" />'+
+												'<input type="hidden" name="'+ $el.find(selector.media_button).data('field-name') +'" value="' + id + '">'+ primary_button;
+				$el.find(selector.image_wrapper).find('ul').append(template);
+
+				imagesList.init_sortable();
+
+				if( index == 0 ) {
+					imagesList.default_primary_image( $el, id );
+				}
+			});
+		},
+
+		//Preselect images
+		preselect_images: function( $el ) {
+			var selection = imagesList._frame.state().get('selection');
+			$.each( $el.find( selector.single_image_wrapper ), function(index, item) {
+					var id = $(this).find('img').data('id');
+					var attachment = wp.media.attachment(id);
+					attachment.fetch();
+					selection.add( attachment ? [ attachment ] : [] );
+			});
+		},
+
+		//Delete single image
+		delete_single_image: function( $el ) {
+			var image_id =  $el.closest( selector.single_image_wrapper ).find('img').data('id');
+      var _current_wrapper = $el.closest(selector.field_wrapper);
+
+			$el.closest( selector.single_image_wrapper ).fadeOut('fast', function() {
+				if( image_id == $el.closest(selector.field_wrapper).find( selector.primary_image_field ).val() ) {
+					$el.closest(selector.field_wrapper).find( selector.primary_image_field ).val('0');
+				}
+        $(this).remove();
+
+				if( !_current_wrapper.find( selector.single_image_wrapper ).eq(0).hasClass('disabled') &&  _current_wrapper.find('.disabled').length == 0 ) {
+          image_id = _current_wrapper.find(selector.single_image_wrapper).eq(0).find('img').data('id');
+          imagesList.default_primary_image( _current_wrapper, image_id);
 				}
 
-				//Extend the wp.media object
-				custom_uploader = wp.media.frames.file_frame = wp.media({
-						title: 'Select Images',
-						library: {
-							type: 'image'
-						},
-						button: {
-								text: 'Select Images'
-						},
-						multiple: true
-				});
-
-				//When a file is selected, grab the URL and set it as the text field's value
-				custom_uploader.on('select', function() {
-						attachment = custom_uploader.state().get('selection').toJSON();
-						$( settings.image_wrapper ).html('<ul></ul>');
-						$.each(attachment, function(index, image) {
-							var thumb = image.sizes.thumbnail.url;
-							var id = image.id;
-
-							var template = '<li class="'+ settings.single_image_wrapper.replace('.', '') +'">'+
-															'<a href="#" class="'+ settings.delete_image_button.replace('.', '') +'"><span class="dashicons dashicons-no"></span></a>'+
-															'<img src="' + thumb + '" data-id="' + id + '" />'+
-															'<input type="hidden" name="'+ $( settings.media_button ).data('field-name') +'" value="' + id + '">'+
-															'<a href="#" class="gk_set-primary-image">Set as primary</a></li>';
-							$(settings.image_wrapper).find('ul').append(template);
-
-							init_sortable();
-
-							if( index == 0 ) {
-								default_primary(id);
-							}
-						});
-				});
-
-
-				//Preselect media when popup opened
-				custom_uploader.on('open', function() {
-					var selection = custom_uploader.state().get('selection');
-					$.each( $( settings.single_image_wrapper ), function(index, item) {
-							var id = $(this).find('img').data('id');
-							var attachment = wp.media.attachment(id);
-							attachment.fetch();
-							selection.add( attachment ? [ attachment ] : [] );
-					});
-				});
-
-				//Open the uploader dialog
-				custom_uploader.open();
-		});
-
-		//Delete Image
-		$( settings.image_wrapper ).on('click', settings.delete_image_button, function(e) {
-			e.preventDefault();
-			var image_id =  $(this).closest( settings.single_image_wrapper ).find('img').data('id');
-			$(this).closest( settings.single_image_wrapper ).fadeOut('fast', function() {
-				if( image_id == $( settings.primary_image_field ).val() ) {
-					$( settings.primary_image_field ).val('0');
-				}
-        $(this).closest( settings.single_image_wrapper ).remove();
-
-				if( !$( settings.single_image_wrapper ).eq(0).hasClass('disabled') &&  $( settings.image_wrapper ).find('.disabled').length == 0 ) {
-					default_primary(image_id);
-				}
-
-				if( $( settings.image_wrapper ).find( settings.single_image_wrapper ).length == 0 ) {
-					$( settings.primary_image_field ).val(0);
+				if( _current_wrapper.find( selector.single_image_wrapper ).length == 0 ) {
+					_current_wrapper.find( selector.primary_image_field ).val(0);
 				}
 
       });
-		})
-
-		//Set default primary image
-		function default_primary( image_id ) {
-			var primary_text = '<span class="gk_primary-image-text">Primary Image <i class="dashicons dashicons-yes"></i></span>';
-			$( settings.primary_image_field ).val( image_id );
-			$( settings.single_image_wrapper ).eq(0).addClass('disabled');
-			$( primary_text ).prependTo( $(settings.single_image_wrapper).eq(0) ).slideDown();
-		}
-
-		//Drag and drop images
-		function init_sortable() {
-			$(settings.image_wrapper).find('ul').sortable({
-				placeholder: "gk_image-sortable-placeholder"
-			});
-
-			$(settings.image_wrapper).disableSelection();
-		}
-
-		//Set primary image
-		$( settings.image_wrapper ).on('click', settings.set_primary_button, function(e) {
-			e.preventDefault();
-			if( !$(this).closest( settings.single_image_wrapper ).hasClass('disabled') ) {
-				var image_id = $(this).closest( settings.single_image_wrapper ).find('img').data('id');
-				var primary_button = $(this);
-				var primary_text = '<span class="gk_primary-image-text">Primary Image <i class="dashicons dashicons-yes"></i></span>';
-
-				$( settings.single_image_wrapper ).find( '.gk_primary-image-text' ).slideUp(function() {
-					$(this).remove();
-				})
-
-				$( settings.single_image_wrapper ).removeClass('disabled');
-				primary_button.closest( settings.single_image_wrapper ).addClass('disabled');
-
-				$( primary_text ).prependTo( $(primary_button).closest(settings.single_image_wrapper) ).slideDown();
-				$( settings.primary_image_field ).val( image_id );
-			}
-		})
+		},
 
 		//Clear all images
-		$('#gk_clear-all').click(function(e) {
-			e.preventDefault();
+		clear_all_images: function( $el ) {
 			var warning = confirm( "This action cannot be undone. Do you want to continue?" );
 
 			if( warning ) {
-				$('#gk_images-wrapper').html('');
-				$('#gk_primary-image-field').val('');
+				$el.closest( selector.field_wrapper ).find( selector.image_wrapper ).html('');
+				$el.closest( selector.field_wrapper ).find( selector.primary_image_field ).val('0');
+				$el.hide();
 			}
-		})
-	}
+		},
 
+		//Enable drag and drop
+		init_sortable: function() {
+			$(selector.image_wrapper).find('ul').sortable({
+				placeholder: selector.image_placeholder
+			});
+
+			$(selector.image_wrapper).disableSelection();
+		},
+
+		//Default primary image
+		default_primary_image: function( $el, image_id ) {
+      if( image_id != undefined ) {
+        var primary_text = '<span class="gk_primary-image-text">Primary Image <i class="dashicons dashicons-yes"></i></span>';
+
+        if( $el.find( selector.image_wrapper ).data('enable-primary') ) {
+          $el.find( selector.primary_image_field ).val( image_id );
+          $el.find( selector.single_image_wrapper ).eq(0).addClass('disabled');
+          $( primary_text ).prependTo( $el.find(selector.single_image_wrapper).eq(0) ).slideDown();
+        }
+      }
+		},
+
+		//Set primary image
+		set_primary_image: function( $el ) {
+			if( !$el.closest( selector.single_image_wrapper ).hasClass('disabled') ) {
+				var image_id = $el.closest( selector.single_image_wrapper ).find('img').data('id');
+				var primary_text = '<span class="gk_primary-image-text">Primary Image <i class="dashicons dashicons-yes"></i></span>';
+
+				$el.closest( selector.field_wrapper ).find( selector.single_image_wrapper ).find( selector.primary_image_text ).slideUp(function() {
+					$(this).remove();
+				})
+
+				$el.closest( selector.field_wrapper ).find( selector.single_image_wrapper ).removeClass('disabled');
+				$el.closest( selector.single_image_wrapper ).addClass('disabled');
+
+				$( primary_text ).prependTo( $el.closest(selector.single_image_wrapper) ).slideDown();
+				$el.closest( selector.field_wrapper ).find( selector.primary_image_field ).val( image_id );
+			}
+		},
+
+    //Wp.media events
+    media_events: function( $el ) {
+      imagesList._frame.on('open', function() {
+				imagesList.preselect_images( $el );
+      });
+
+      imagesList._frame.on('select', function() {
+				imagesList.get_selection( $el );
+      });
+    },
+
+    //Button event
+    button_events: function() {
+			//Open media library
+			$(document).on('click', selector.media_button, function(e) {
+        e.preventDefault();
+				imagesList.reset_frame();
+				imagesList.create_media_frame( $(this).closest( selector.field_wrapper ) );
+				imagesList._frame.open();
+			});
+
+			//Set primary image button
+			$(document).on('click', selector.set_primary_button, function(e) {
+        e.preventDefault();
+				imagesList.set_primary_image( $(this) );
+			});
+
+			//Delete single image button
+			$(document).on('click', selector.delete_image_button, function(e) {
+        e.preventDefault();
+				imagesList.delete_single_image( $(this) );
+			});
+
+			//Clear all images button
+			$(document).on('click', selector.clear_all_button, function(e) {
+        e.preventDefault();
+				imagesList.clear_all_images( $(this) );
+			});
+    },
+
+		init: function() {
+			this.button_events();
+			this.init_sortable();
+		}
+
+  }
+
+	function initialize_field( $el ) {
+
+	}
 
 	if( typeof acf.add_action !== 'undefined' ) {
 
@@ -175,7 +229,6 @@
 		*/
 
 		acf.add_action('ready append', function( $el ){
-
 			// search $el for fields of type 'images_list'
 			acf.get_fields({ type : 'images_list'}, $el).each(function(){
 
@@ -205,7 +258,6 @@
 		*/
 
 		$(document).on('acf/setup_fields', function(e, postbox){
-
 			$(postbox).find('.field[data-field_type="images_list"]').each(function(){
 
 				initialize_field( $(this) );
