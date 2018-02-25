@@ -31,8 +31,9 @@ class acf_field_images_list extends acf_field {
 		$this->label = __('Images List');
 		$this->category = __("Content",'acf'); // Basic, Content, Choice, etc
 		$this->defaults = array(
-			"images" 				=> array(),
-			"primary_image" => 0
+			"images" 					=> array(),
+			"primary_image" 	=> 0,
+			"enable_primary"	=> 1
 		);
 
 
@@ -90,7 +91,28 @@ class acf_field_images_list extends acf_field {
 
 		// Create Field Options HTML
 		?>
+		<tr class="field_option field_option_<?php echo $this->name; ?>">
+			<td class="label">
+				<label><?php _e("Enable primary image?",'acf'); ?></label>
+				<p><?php _e("Show set primary button",'acf') ?></p>
+			</td>
+			<td>
+				<?php
 
+				do_action('acf/create_field', array(
+					'type'		=>	'radio',
+					'name'		=>	'fields['.$key.'][enable_primary]',
+					'value'		=>	$field['enable_primary'],
+					'layout'	=>	'horizontal',
+					'choices' 	=>	array(
+						1 => 'Yes',
+						0 => 'No'
+					)
+				));
+
+				?>
+			</td>
+		</tr>
 		<?php
 
 	}
@@ -113,9 +135,9 @@ class acf_field_images_list extends acf_field {
 		// defaults?
 
 		$field = array_merge($this->defaults, $field);
-
 		$image_value = isset($field['value']['images']) ? $field['value']['images'] : $field['images'];
 		$image_name = $field['name'].'[images][]';
+		$enable_primary = $field['enable_primary'];
 
 		$image_primary_value = isset($field['value']['primary_image']) ? $field['value']['primary_image'] : $field['primary_image'];
 		$image_primary_name = $field['name'].'[primary_image]';
@@ -125,19 +147,26 @@ class acf_field_images_list extends acf_field {
 		// create Field HTML
 		?>
 		<div class="gk_button-media-library-wrapper">
-			<button type="button" name="button" id="gk_open-media-library" data-field-name="<?php echo $image_name; ?>">Add Images</button>
 			<?php
+				$show_clear_btn = 'none';
+
 				if( count( $image_value ) > 0 ) {
-			?>
-			<button type="button" name="button" id="gk_clear-all">Clear All</button>
-			<?php
+					$show_clear_btn = 'inline-block';
 				}
 			?>
+			<button type="button" name="button" class="gk_open-media-library" data-field-name="<?php echo $image_name; ?>">Select Images</button>
+			<button type="button" name="button" class="gk_clear-all" style="display:<?php echo $show_clear_btn; ?>">Clear All</button>
 		</div>
-		<div id="gk_images-wrapper">
+		<div class="gk_images-wrapper" data-enable-primary="<?php echo $enable_primary; ?>">
 			<?php
 				if( count( $image_value > 0 ) && $image_value != null  ) {
-					echo '<ul>';
+					$has_primary_class = 'has-primary';
+
+					if( !$enable_primary ) {
+						$has_primary_class = '';
+					}
+
+					echo '<ul class="'.$has_primary_class.'">';
 					foreach ($image_value as $image_id) {
 						$primary_text = '';
 						$disable_class = '';
@@ -147,18 +176,22 @@ class acf_field_images_list extends acf_field {
 							$image_url = plugins_url( 'assets/images/default-placeholder.jpg', dirname(__FILE__) );
 						}
 
-						if( $image_id == $image_primary_value ) {
+						if( $image_id == $image_primary_value && $enable_primary ) {
 							$primary_text = '<span class="gk_primary-image-text">Primary Image <i class="dashicons dashicons-yes"></i></span>';
 							$disable_class = 'disabled';
 						}
 						?>
 
-						<li class="gk_image-block <?php echo $disable_class; ?>">
+						<li class="gk_image-block <?php echo $disable_class ?>">
 							<?php echo $primary_text; ?>
 			        <a href="#" class="gk_del-image"><span class="dashicons dashicons-no"></span></a>
 			        <img src="<?= $image_url; ?>" data-id="<?= $image_id; ?>"/>
 			        <input type="hidden" name="<?php echo $image_name; ?>" value="<?= $image_id; ?>">
+							<?php
+								if( $enable_primary ) {
+							?>
 							<a href="#" class="gk_set-primary-image">Set as primary</a>
+							<?php } ?>
 			      </li>
 
 						<?php
@@ -167,7 +200,7 @@ class acf_field_images_list extends acf_field {
 				}
 			?>
 		</div>
-		<input type="hidden" id="gk_primary-image-field" name="<?php echo $image_primary_name; ?>" value="<?php echo $image_primary_value; ?>" />
+		<input type="hidden" class="gk_primary-image-field" name="<?php echo $image_primary_name; ?>" value="<?php echo $image_primary_value; ?>" />
 		<?php
 	}
 
