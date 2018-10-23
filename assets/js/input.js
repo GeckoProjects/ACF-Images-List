@@ -13,9 +13,9 @@
     primary_image_field: '.gk_primary-image-field',
 		primary_image_text: '.gk_primary-image-text',
     clear_all_button: '.gk_clear-all',
-    field_wrapper: '.field',
+    field_wrapper: '.acf-field',
 		image_placeholder: 'gk_image-sortable-placeholder'
-  }
+  };
 
   var imagesList = {
     _frame: null,
@@ -30,7 +30,7 @@
   				button: {
   						text: 'Select Images'
   				},
-  				multiple: true
+  				multiple: 'add'
   		});
 
 			imagesList.media_events( $el );
@@ -47,7 +47,7 @@
 		//Get images selection and insert to DOM
 		get_selection: function( $el ) {
 			var attachment = imagesList._frame.state().get('selection').toJSON();
-			$el.find( selector.image_wrapper ).html('<ul></ul>');
+			$el.find( selector.image_wrapper ).find('ul').html('');
 
 			if( attachment.length > 0 ) {
 				$( selector.clear_all_button ).fadeIn().css("display","inline-block");
@@ -56,7 +56,7 @@
 			$.each(attachment, function(index, image) {
 				var thumb = image.sizes.thumbnail.url;
 				var id = image.id;
-        var primary_button = '<a href="javascript:void(0)" class="gk_set-primary-image">Set as primary</a></li>';
+        var primary_button = '<a href="javascript:void(0)" class="gk_set-primary-image">Set as primary</a>';
 
         if( !$el.find( selector.image_wrapper ).data('enable-primary') ) {
           primary_button = '';
@@ -65,7 +65,7 @@
 				var template = '<li class="'+ selector.single_image_wrapper.replace('.', '') +'">'+
 												'<a href="javascript:void(0)" class="'+ selector.delete_image_button.replace('.', '') +'"><span class="dashicons dashicons-no"></span></a>'+
 												'<img src="' + thumb + '" data-id="' + id + '" />'+
-												'<input type="hidden" name="'+ $el.find(selector.media_button).data('field-name') +'" value="' + id + '">'+ primary_button;
+												'<input type="hidden" name="'+ $el.find(selector.media_button).data('field-name') +'" value="' + id + '">'+ primary_button + '</li>';
 				$el.find(selector.image_wrapper).find('ul').append(template);
 
 				imagesList.init_sortable();
@@ -115,7 +115,7 @@
 			var warning = confirm( "This action cannot be undone. Do you want to continue?" );
 
 			if( warning ) {
-				$el.closest( selector.field_wrapper ).find( selector.image_wrapper ).html('');
+				$el.closest( selector.field_wrapper ).find( selector.image_wrapper ).find('ul').html('');
 				$el.closest( selector.field_wrapper ).find( selector.primary_image_field ).val('0');
 				$el.hide();
 			}
@@ -151,7 +151,7 @@
 
 				$el.closest( selector.field_wrapper ).find( selector.single_image_wrapper ).find( selector.primary_image_text ).slideUp(function() {
 					$(this).remove();
-				})
+				});
 
 				$el.closest( selector.field_wrapper ).find( selector.single_image_wrapper ).removeClass('disabled');
 				$el.closest( selector.single_image_wrapper ).addClass('disabled');
