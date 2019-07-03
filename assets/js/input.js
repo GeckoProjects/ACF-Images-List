@@ -23,9 +23,9 @@
     //Create media dialog frame
     create_media_frame: function( $el ) {
   		imagesList._frame = wp.media.frames.file_frame = wp.media({
-  				title: 'Select Images',
+  				title: 'Select Media',
   				library: {
-  					type: 'image'
+  					type: [ 'video', 'image' ]
   				},
   				button: {
   						text: 'Select Images'
@@ -53,19 +53,39 @@
 				$( selector.clear_all_button ).fadeIn().css("display","inline-block");
 			}
 
-			$.each(attachment, function(index, image) {
-				var thumb = image.sizes.thumbnail.url;
-				var id = image.id;
+			$.each(attachment, function(index, media) {
+        var thumb = '',
+            filename = '',
+            media_class = '';
+
+        switch (media.type) {
+          case 'image':
+            thumb = media.sizes.thumbnail.url;
+            media_class = 'media-image';
+            break;
+          case 'video':
+            thumb = media.thumb.src;
+            filename = '<label class="filename"><span>' + media.filename + '</span></label>';
+            media_class = 'media-video';
+            break;
+        }
+
+				var id = media.id;
         var primary_button = '<a href="javascript:void(0)" class="gk_set-primary-image">Set as primary</a>';
 
         if( !$el.find( selector.image_wrapper ).data('enable-primary') ) {
           primary_button = '';
         }
 
-				var template = '<li class="'+ selector.single_image_wrapper.replace('.', '') +'">'+
+        var media_id_name = $el.find(selector.media_button).data('field-name') + '['+ index +'][id]',
+            media_type_name = $el.find(selector.media_button).data('field-name') + '['+ index +'][type]';
+
+				var template = '<li class="'+ selector.single_image_wrapper.replace('.', '') + ' ' + media_class + '">'+
 												'<a href="javascript:void(0)" class="'+ selector.delete_image_button.replace('.', '') +'"><span class="dashicons dashicons-no"></span></a>'+
-												'<img src="' + thumb + '" data-id="' + id + '" />'+
-												'<input type="hidden" name="'+ $el.find(selector.media_button).data('field-name') +'" value="' + id + '">'+ primary_button + '</li>';
+												'<img src="' + thumb + '" data-id="' + id + '" />'+ filename +
+												'<input type="hidden" name="'+ media_id_name +'" value="' + id + '">'+
+                        '<input type="hidden" name="'+ media_type_name +'" value="' + media.type + '">'+
+                        primary_button + '</li>';
 				$el.find(selector.image_wrapper).find('ul').append(template);
 
 				imagesList.init_sortable();
@@ -206,7 +226,7 @@
 			this.init_sortable();
 		}
 
-  }
+  };
 
 	function initialize_field( $el ) {
 

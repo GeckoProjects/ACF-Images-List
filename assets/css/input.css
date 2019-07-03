@@ -128,3 +128,31 @@ ul.has-primary .gk_del-image{
   cursor:not-allowed;
   background-color:#d6d6d6;
 }
+
+.gk_image-block.media-video{
+  background-color:#ededed
+}
+
+.gk_image-block.media-video img{
+  position:relative;
+  top:20px
+}
+
+.gk_image-block .filename{
+  position:absolute;
+  bottom:0;
+  left:0;
+  width:100%;
+  background-color:#FFF;
+  height:50px;
+}
+
+.gk_image-block .filename span{
+  position:absolute;
+  display:block;
+  width:100%;
+  z-index:9;
+  top:50%;
+  -webkit-transform:translateY(-50%);
+          transform:translateY(-50%)
+}

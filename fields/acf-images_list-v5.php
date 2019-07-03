@@ -52,8 +52,8 @@ class acf_field_images_list extends acf_field {
 		*/
 
 		$this->defaults = array(
-			'images'					=> array(),
-			'primary_image'		=> 0,
+			'media'						=> array(),
+			'primary_media'		=> 0,
 			'enable_primary'	=> 1
 		);
 
@@ -107,7 +107,7 @@ class acf_field_images_list extends acf_field {
 		*/
 
 		acf_render_field_setting( $field, array(
-			'label'			=> __('Enable primary image?','acf-images_list'),
+			'label'			=> __('Enable primary media?','acf-images_list'),
 			'instructions'	=> __('Show set primary button','acf-images_list'),
 			'type'			=> 'radio',
 			'name'			=> 'enable_primary',
@@ -147,28 +147,23 @@ class acf_field_images_list extends acf_field {
 		*/
 
 		$field = array_merge($this->defaults, $field);
-		$image_value = isset($field['value']['images']) ? $field['value']['images'] : $field['images'];
-		$image_name = $field['name'].'[images][]';
+		$media_value = isset($field['value']['media']) ? $field['value']['media'] : $field['media'];
+		$media_name = $field['name'].'[media]';
 		$enable_primary = $field['enable_primary'];
 
-		$image_primary_value = isset($field['value']['primary_image']) ? $field['value']['primary_image'] : $field['primary_image'];
-		$image_primary_name = $field['name'].'[primary_image]';
-
-
-		/*
-		*  Create a simple text input using the 'font_size' setting.
-		*/
+		$media_primary_value = isset($field['value']['primary_media']) ? $field['value']['primary_media'] : $field['primary_media'];
+		$media_primary_name = $field['name'].'[primary_media]';
 
 		?>
 		<div class="gk_button-media-library-wrapper">
 			<?php
 				$show_clear_btn = 'none';
 
-				if( count( $image_value ) > 0 ) {
+				if( count( $media_value ) > 0 ) {
 					$show_clear_btn = 'inline-block';
 				}
 			?>
-			<button type="button" name="button" class="gk_open-media-library" data-field-name="<?php echo $image_name; ?>">Select Images</button>
+			<button type="button" name="button" class="gk_open-media-library" data-field-name="<?php echo $media_name; ?>">Select Media</button>
 			<button type="button" name="button" class="gk_clear-all" style="display:<?php echo $show_clear_btn; ?>">Clear All</button>
 		</div>
 		<div class="gk_images-wrapper" data-enable-primary="<?php echo $enable_primary; ?>">
@@ -180,27 +175,44 @@ class acf_field_images_list extends acf_field {
 				}
 
 				echo '<ul class="'.$has_primary_class.'">';
-				if( count( $image_value ) > 0 && $image_value != null  ) {
-					foreach ($image_value as $image_id) {
+				if( count( $media_value ) > 0 && $media_value != null  ) {
+					$media_value = array_values($media_value);
+
+					foreach ($media_value as $index => $media_item) {
 						$primary_text = '';
 						$disable_class = '';
-						$image_url = wp_get_attachment_image_src( $image_id, 'thumbnail' )[0];
 
-						if( !$image_url ) {
-							$image_url = plugins_url( 'assets/images/default-placeholder.jpg', dirname(__FILE__) );
+						switch ($media_item['type']) {
+							case 'image':
+								$media_url = wp_get_attachment_image_src( $media_item['id'], 'thumbnail' )[0];
+								$filename = '';
+								$media_class = 'media-image';
+								break;
+							case 'video':
+								$media_url = site_url() . '/wp-includes/images/media/video.png';
+								$filename = '<label class="filename"><span>'. basename( get_attached_file( $media_item['id'] ) ) .'</span></label>';
+								$media_class = 'media-video';
+								break;
 						}
 
-						if( $image_id == $image_primary_value && $enable_primary ) {
-							$primary_text = '<span class="gk_primary-image-text">Primary Image <i class="dashicons dashicons-yes"></i></span>';
+
+						if( !$media_url ) {
+							$media_url = plugins_url( 'assets/images/default-placeholder.jpg', dirname(__FILE__) );
+						}
+
+						if( $media_item['id'] == $media_primary_value && $enable_primary ) {
+							$primary_text = '<span class="gk_primary-image-text">Primary Media <i class="dashicons dashicons-yes"></i></span>';
 							$disable_class = 'disabled';
 						}
 						?>
 
-						<li class="gk_image-block <?php echo $disable_class ?>">
+						<li class="gk_image-block <?php echo $disable_class . ' ' . $media_class ?>">
 							<?php echo $primary_text; ?>
 							<a href="#" class="gk_del-image"><span class="dashicons dashicons-no"></span></a>
-							<img src="<?= $image_url; ?>" data-id="<?= $image_id; ?>"/>
-							<input type="hidden" name="<?php echo $image_name; ?>" value="<?= $image_id; ?>">
+							<img src="<?php echo $media_url; ?>" data-id="<?php echo $media_item['id']; ?>"/>
+							<?php echo $filename; ?>
+							<input type="hidden" name="<?php echo $media_name.'['. $index .'][id]'; ?>" value="<?php echo $media_item['id']; ?>">
+							<input type="hidden" name="<?php echo $media_name.'['. $index .'][type]'; ?>" value="<?php echo $media_item['type']; ?>">
 							<?php
 								if( $enable_primary ) {
 							?>
@@ -214,7 +226,7 @@ class acf_field_images_list extends acf_field {
 				echo '</ul>';
 			?>
 		</div>
-		<input type="hidden" class="gk_primary-image-field" name="<?php echo $image_primary_name; ?>" value="<?php echo $image_primary_value; ?>" />
+		<input type="hidden" class="gk_primary-image-field" name="<?php echo $media_primary_name; ?>" value="<?php echo $media_primary_value; ?>" />
 		<?php
 	}
 

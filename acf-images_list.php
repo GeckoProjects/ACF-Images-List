@@ -3,8 +3,8 @@
 /*
 Plugin Name: Advanced Custom Fields: Images List
 Plugin URI: https://github.com/GeckoProjects/ACF-Images-List
-Description: Images list Add on for Advanced Custom Fields (Currently only support for V4 ACF)
-Version: 3.0
+Description: Images list Add on for Advanced Custom Fields
+Version: 3.1
 Author: Bayu Darmantra
 Author URI: https://github.com/GeckoProjects/ACF-Images-List
 License: GPLv2 or later
@@ -38,7 +38,7 @@ class acf_plugin_images_list {
 
 		// vars
 		$this->settings = array(
-			'version'	=> '2.1.0',
+			'version'	=> '3.1',
 			'url'		=> plugin_dir_url( __FILE__ ),
 			'path'		=> plugin_dir_path( __FILE__ )
 		);
